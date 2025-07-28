@@ -1,4 +1,11 @@
 <launch>
-    <node pkg="autoware_mini_practice_solutions" name="publisher" type="publisher.py" output="screen" required="true"/>
+    <node pkg="autoware_mini_practice_solutions" name="publisher1" type="publisher.py" output="screen" required="true" >
+         <param name="message"   value="Hello ROS1!" />
+         <param name="publish_frequency" value="2" />
+    </node>
+    <node pkg="autoware_mini_practice_solutions" name="publisher2" type="publisher.py" output="screen" required="true" >
+         <param name="message"   value="Hello ROS2!" />
+         <param name="publish_frequency" value="10" />
+    </node>
     <node pkg="autoware_mini_practice_solutions" name="subscriber" type="subscriber.py" output="screen" required="true"/>
 </launch>
