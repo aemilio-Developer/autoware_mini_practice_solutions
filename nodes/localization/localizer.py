@@ -54,7 +54,6 @@ class Localizer:
         transform_x, transform_y = self.transformer.transform(msg.latitude, msg.longitude)
         current_x = transform_x - self.origin_x
         current_y = transform_y - self.origin_y
-        print(current_x, current_y)
 
         # calculate azimuth correction
         azimuth_correction = self.utm_projection.get_factors(msg.longitude, msg.latitude).meridian_convergence
