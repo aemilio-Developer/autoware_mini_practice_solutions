@@ -20,6 +20,7 @@ class PurePursuitFollower:
         self.lookahead_distance = rospy.get_param("~lookahead_distance")
         self.wheel_base = rospy.get_param("/vehicle/wheel_base")
         self.distance_to_velocity_interpolator = None
+        self.end_of_track = False
 
         # Publishers
         self.vehicle_cmd_pub = rospy.Publisher('/control/vehicle_cmd', VehicleCmd, queue_size=10)
@@ -29,21 +30,25 @@ class PurePursuitFollower:
         rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
 
     def path_callback(self, msg):
+
         # convert waypoints to shapely linestring
         self.path_linstring = LineString([(w.position.x, w.position.y) for w in msg.waypoints])
         # prepare path - creates spatial tree, making the spatial queries more efficient
         prepare(self.path_linstring)
-        # collect waypoint x and y coordinates
-        waypoints_xy = np.array([(w.position.x, w.position.y) for w in msg.waypoints])
-        # Calculate distances between points
-        distances = np.cumsum(np.sqrt(np.sum(np.diff(waypoints_xy, axis=0)**2, axis=1)))
-        # add 0 distance in the beginning
-        distances = np.insert(distances, 0, 0)
-        # Extract velocity values at waypoints
-        velocities = np.array([w.speed for w in msg.waypoints])
-        # Create a distance-to-velocity interpolator for the path
-        self.distance_to_velocity_interpolator = interp1d(distances, velocities, kind='linear', fill_value=0.0, bounds_error=False)
 
+        if msg.waypoints:
+            # collect waypoint x and y coordinates
+            waypoints_xy = np.array([(w.position.x, w.position.y) for w in msg.waypoints])
+            # Calculate distances between points
+            distances = np.cumsum(np.sqrt(np.sum(np.diff(waypoints_xy, axis=0)**2, axis=1)))
+            # add 0 distance in the beginning
+            distances = np.insert(distances, 0, 0)
+            # Extract velocity values at waypoints
+            velocities = np.array([w.speed for w in msg.waypoints])
+            # Create a distance-to-velocity interpolator for the path
+            self.distance_to_velocity_interpolator = interp1d(distances, velocities, kind='linear', fill_value=0.0, bounds_error=False)
+        else:
+            self.end_of_track = True
         
 
     def current_pose_callback(self, msg):
@@ -52,7 +57,7 @@ class PurePursuitFollower:
             velocity = 0.0
             steering_angle = 0.0
 
-            if self.path_linstring is not None:
+            if self.end_of_track is False and self.path_linstring is not None:
                 d_ego_from_path_start = self.path_linstring.project(current_pose)
 
                 _, _, heading = euler_from_quaternion([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
