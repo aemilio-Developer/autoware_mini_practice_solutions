@@ -49,6 +49,8 @@ class PurePursuitFollower:
     def current_pose_callback(self, msg):
 
             current_pose = Point([msg.pose.position.x, msg.pose.position.y])
+            velocity = 0.0
+            steering_angle = 0.0
 
             if self.path_linstring is not None:
                 d_ego_from_path_start = self.path_linstring.project(current_pose)
@@ -66,17 +68,15 @@ class PurePursuitFollower:
                 alpha = lookahead_heading - heading
                 steering_angle = np.arctan((2*self.wheel_base*math.sin(alpha))/ld)
 
-                if self.distance_to_velocity_interpolator is not None:
-                    velocity = self.distance_to_velocity_interpolator(d_ego_from_path_start)
-                else:
-                    velocity = 0.0
-                
-                vehicle_cmd = VehicleCmd()
-                vehicle_cmd.header.stamp = msg.header.stamp
-                vehicle_cmd.header.frame_id = "base_link"
-                vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
-                vehicle_cmd.ctrl_cmd.linear_velocity = velocity
-                self.vehicle_cmd_pub.publish(vehicle_cmd)
+            if self.distance_to_velocity_interpolator is not None and d_ego_from_path_start is not None:
+                velocity = self.distance_to_velocity_interpolator(d_ego_from_path_start)
+            
+            vehicle_cmd = VehicleCmd()
+            vehicle_cmd.header.stamp = msg.header.stamp
+            vehicle_cmd.header.frame_id = "base_link"
+            vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
+            vehicle_cmd.ctrl_cmd.linear_velocity = velocity
+            self.vehicle_cmd_pub.publish(vehicle_cmd)
 
 
     def run(self):
