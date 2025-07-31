@@ -68,8 +68,8 @@ class PurePursuitFollower:
                 alpha = lookahead_heading - heading
                 steering_angle = np.arctan((2*self.wheel_base*math.sin(alpha))/ld)
 
-            if self.distance_to_velocity_interpolator is not None and d_ego_from_path_start is not None:
-                velocity = self.distance_to_velocity_interpolator(d_ego_from_path_start)
+                if self.distance_to_velocity_interpolator is not None:
+                    velocity = self.distance_to_velocity_interpolator(d_ego_from_path_start)
             
             vehicle_cmd = VehicleCmd()
             vehicle_cmd.header.stamp = msg.header.stamp
