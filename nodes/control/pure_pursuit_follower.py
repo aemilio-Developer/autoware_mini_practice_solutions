@@ -37,6 +37,7 @@ class PurePursuitFollower:
         prepare(self.path_linstring)
 
         if msg.waypoints:
+            self.end_of_track = False
             # collect waypoint x and y coordinates
             waypoints_xy = np.array([(w.position.x, w.position.y) for w in msg.waypoints])
             # Calculate distances between points
