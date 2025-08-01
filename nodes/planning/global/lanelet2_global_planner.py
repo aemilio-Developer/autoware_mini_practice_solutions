@@ -9,6 +9,8 @@ from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
 from lanelet2.geometry import findNearest
+
+# Other imports required for the lanelet2_global_planner
 from geometry_msgs.msg import PoseStamped
 from autoware_mini.msg import Path, Waypoint
 from shapely import distance
@@ -86,6 +88,7 @@ class GlobalPlanner:
             if d <=  self.distance_to_goal_limit:
                 self.waypoints_publishing([])
                 rospy.loginfo("%s - goal reached, path has been cleared!", rospy.get_name())
+                self.goal_point = None
 
 
     def compute_path(self):
@@ -126,7 +129,7 @@ class GlobalPlanner:
                 if not last_lanelet and idx == len(lanelet.centerline)-1:
                     break
 
-                coords.append((point.x, point.y, point.z))  # save all points in a list to build linestring
+                coords.append((point.x, point.y, point.z))  # save all points in a list to build linestring later
 
                 waypoint = Waypoint()
                 waypoint.position.x = point.x
@@ -141,11 +144,9 @@ class GlobalPlanner:
             line = LineString([(x, y) for x, y, z in coords])
             goal_shapely = Point(self.goal_point.x, self.goal_point.y)
 
-            # Project the goal point onto the line
             proj_dist = line.project(goal_shapely)
             proj_point = line.interpolate(proj_dist)
 
-            # Replace the last waypoint with the projected goal-aligned one
             final_wp = Waypoint()
             final_wp.position.x = proj_point.x
             final_wp.position.y = proj_point.y
