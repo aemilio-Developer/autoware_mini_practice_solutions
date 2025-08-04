@@ -14,7 +14,6 @@ from std_msgs.msg import ColorRGBA, Header, Float32
 from geometry_msgs.msg import Point32
 
 
-
 BLUE80P = ColorRGBA(0.0, 0.0, 1.0, 0.8)
 
 class ClusterDetector:
@@ -38,7 +37,6 @@ class ClusterDetector:
         labels = data['label']
 
         if msg.header.frame_id != self.output_frame:
-            # fetch transform for target frame
             try:
                 transform = self.tf_buffer.lookup_transform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
             except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
@@ -46,11 +44,8 @@ class ClusterDetector:
                 return
         
             tf_matrix = numpify(transform.transform).astype(np.float32)
-            # make copy of points
             points = points.copy()
-            # turn into homogeneous coordinates
             points[:,3] = 1
-            # transform points to target frame
             points = points.dot(tf_matrix.T)
         
 
@@ -60,13 +55,11 @@ class ClusterDetector:
 
         unique_labels = np.unique(labels)
 
-        # filter valid labels: skip clusters smaller than min size
         valid_labels = []
         for label in unique_labels:
             if np.sum(labels == label) >= self.min_cluster_size:
                 valid_labels.append(label)
         
-        # publish empty array if no clusters
         if len(valid_labels) == 0:
             rospy.loginfo("%s - No valid clusters found", rospy.get_name())
             self.objects_pub.publish(detected_msg)
@@ -85,7 +78,6 @@ class ClusterDetector:
             obj.velocity_reliable = False
             obj.acceleration_reliable = False
 
-            # Centroid
             centroid = np.mean(cluster_points, axis=0)
             obj.centroid.x = centroid[0]
             obj.centroid.y = centroid[1]
