@@ -107,8 +107,6 @@ class LocalPathExtractor:
                 kind='linear': for linear interpolation between waypoints.
 
                 bounds_error=False: allows interpolation outside the original range.
-
-                fill_value=(v_start, v_end): Uses the start/end velocity if queried value is out of bounds (e.g. if ego_distance is before the first point or past the goal).
            """
 
            global_path_velocities_interpolator = interp1d(
