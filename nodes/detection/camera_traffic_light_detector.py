@@ -112,8 +112,6 @@ class CameraTrafficLightDetector:
         # localpath into Linestring
         local_path_linestring = shapely.LineString([(waypoint.position.x, waypoint.position.y) for waypoint in local_path_msg.waypoints])
 
-        stoplines_on_path = []
-
         for stopline_id, stopline in self.tfl_stoplines.items():
             if local_path_linestring.intersects(stopline):
                 stoplines_on_path.append(stopline_id)
