@@ -171,10 +171,6 @@ class CameraTrafficLightDetector:
                     tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[cl]
 
                     traffic_light_result_array_msg.results.append(tfl_result)
-
-                print("Stoplines on path: ", stoplines_on_path)
-                print("Rois: ",rois)
-                print("Predicitions: ",predictions)
             
         self.tfl_status_pub.publish(traffic_light_result_array_msg)
         self.publish_roi_images(image=image,rois=rois,classes=classes,scores=scores,image_time_stamp=camera_image_msg.header.stamp)
