@@ -82,6 +82,7 @@ class SpeedPlanner:
             collision_point_velocities = []
             collision_point_distances = []
             collision_point_categories = []
+            original_collision_point_distances = []
 
             for cp in collision_points:
                 cp_point = Point(cp['x'], cp['y'])
@@ -100,10 +101,12 @@ class SpeedPlanner:
                 collision_point_distances.append(corrected_distance_to_cp)
                 collision_point_velocities.append(rel_speed)
                 collision_point_categories.append(cp['category'])
+                original_collision_point_distances.append(distance_to_cp)
             
             collision_point_distances = np.array(collision_point_distances)
             collision_point_velocities = np.array(collision_point_velocities)
             collision_point_categories = np.array(collision_point_categories)
+            original_collision_point_distances = np.array(original_collision_point_distances)
 
             target_distances = collision_point_distances - self.braking_reaction_time * np.abs(collision_point_velocities)
             target_distances = np.maximum(0, target_distances)  
@@ -114,10 +117,12 @@ class SpeedPlanner:
 
             min_index = np.argmin(target_velocities)
             min_target_velocity = target_velocities[min_index]
-            closest_object_distance = collision_point_distances[min_index] + self.distance_to_car_front
+
+            closest_object_distance = original_collision_point_distances[min_index] - self.distance_to_car_front
+            stopping_point_distance = original_collision_point_distances[min_index]
             closest_object_velocity = collision_point_velocities[min_index]
             collision_point_category = collision_point_categories[min_index]
-            stopping_point_distance = closest_object_distance 
+ 
 
 
             for wp in local_path_msg.waypoints:
