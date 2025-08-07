@@ -111,6 +111,7 @@ class GlobalPlanner:
     def from_lanelet2_to_waypoints(self, path):
         waypoints = []
         coords = []
+        filtered_waypoints = []
 
         last_lanelet = False
 
@@ -147,15 +148,26 @@ class GlobalPlanner:
             proj_dist = line.project(goal_shapely)
             proj_point = line.interpolate(proj_dist)
 
+            #remove all the points that are placed after the goal point
+            for wp in waypoints:
+                proj_wp = line.project(Point(wp.position.x, wp.position.y))
+                if proj_wp < proj_dist:
+                    filtered_waypoints.append(wp)
+
+
             final_wp = Waypoint()
             final_wp.position.x = proj_point.x
             final_wp.position.y = proj_point.y
-            final_wp.position.z = waypoints[-1].position.z  
-            final_wp.speed = waypoints[-1].speed
+            final_wp.position.z = filtered_waypoints[-1].position.z  
+            final_wp.speed = filtered_waypoints[-1].speed
 
-            waypoints[-1] = final_wp  
+            filtered_waypoints[-1] = final_wp
+
+
+        
+
             
-        return waypoints
+        return filtered_waypoints
 
     
     def waypoints_publishing(self, waypoints):
