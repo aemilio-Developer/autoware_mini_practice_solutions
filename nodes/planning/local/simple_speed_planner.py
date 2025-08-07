@@ -95,7 +95,6 @@ class SpeedPlanner:
                 # Calculate heading and projected velocity of the object
                 heading = self.get_heading_at_distance(local_path_linestring, distance_to_cp)
                 obj_velocity_vector = Vector3(x=cp['vx'], y=cp['vy'], z=cp['vz'])
-                obj_speed = np.linalg.norm([cp['vx'], cp['vy'], cp['vz']])
                 rel_speed = self.project_vector_to_heading(heading, obj_velocity_vector)
 
                 collision_point_distances.append(corrected_distance_to_cp)

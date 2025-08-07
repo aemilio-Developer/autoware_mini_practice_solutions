@@ -137,7 +137,8 @@ class CameraTrafficLightDetector:
         traffic_light_result_array_msg = TrafficLightResultArray()
         traffic_light_result_array_msg.header.stamp = camera_image_msg.header.stamp
         image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
-        self.camera_model.rectifyImage(image, image)
+        if self.rectify_image:
+            self.camera_model.rectifyImage(image, image)
 
         rois = []
         classes = []
