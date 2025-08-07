@@ -164,9 +164,6 @@ class GlobalPlanner:
             filtered_waypoints[-1] = final_wp
 
 
-        
-
-            
         return filtered_waypoints
 
     
